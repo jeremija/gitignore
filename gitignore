@@ -1,0 +1,36 @@
+#!/bin/bash
+
+CWD=$(pwd)
+CACHE="$HOME/.cache"
+REPO="https://github.com/github/gitignore"
+REPO_DIR="$CACHE/gitignore"
+
+mkdir -p $CACHE
+
+if [ ! -d "$REPO_DIR" ]; then
+    git clone --depth 1 $REPO "$REPO_DIR"
+fi
+
+cd $REPO_DIR
+
+if [ "$1" == "-u" ] || [ "$1" == "--update" ]; then
+    git pull
+    echo Updated.
+    exit
+fi
+
+# search for .gitignore files
+FILES=""
+for ARG in "$@"; do
+    FILES="$FILES $(ls | grep -i $ARG)"
+done
+
+# do the same in the global directory
+for ARG in "$@"; do
+    FILES="$FILES $(ls Global/ | grep -i $ARG | sed 's/^/Global\//g')"
+done
+
+for FILE in $FILES; do
+    echo "### $FILE ####"
+    cat "$FILE"
+done
