@@ -1,18 +1,27 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
+shopt -s nocaseglob
 
-CACHE="$HOME/.cache"
-REPO="https://github.com/github/gitignore"
-REPO_DIR="$CACHE/gitignore"
+cache="$HOME/.cache"
+repo="https://github.com/github/gitignore"
+repo_dir="$cache/gitignore"
 
-mkdir -p "$CACHE"
-
-if [ ! -d "$REPO_DIR" ]; then
-    echo Cloning gitignore definitions...
-    git clone --depth 1 $REPO "$REPO_DIR"
+if [ $# -eq 0 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+    echo 'Usage:   gitignore [language...]'
+    echo 'Example: gitignore python node > .gitignore'
+    echo 'gitignore by Jerko Steiner <jeremija>'
+    echo 'https://github.com/jeremija/gitignore'
+    exit
 fi
 
-cd "$REPO_DIR"
+mkdir -p "$cache"
+
+if [ ! -d "$repo_dir" ]; then
+    echo Cloning gitignore definitions...
+    git clone --depth 1 $repo "$repo_dir"
+fi
+
+cd "$repo_dir"
 
 if [ "$1" == "-u" ] || [ "$1" == "--update" ]; then
     git pull
@@ -21,17 +30,14 @@ if [ "$1" == "-u" ] || [ "$1" == "--update" ]; then
 fi
 
 # search for .gitignore files
-FILES=""
-for ARG in "$@"; do
-    FILES="$FILES $(ls | grep -i $ARG)"
+files="-iname $1.gitignore"
+shift
+for arg in "$@"; do
+    files="$files -o -iname $arg.gitignore"
 done
+echo $files
 
-# do the same in the global directory
-for ARG in "$@"; do
-    FILES="$FILES $(ls Global/ | grep -i $ARG | sed 's/^/Global\//g')"
-done
-
-for FILE in $FILES; do
-    echo "### $FILE ####"
-    cat "$FILE"
+for file in $(find . $files); do
+    echo "### $file ###"
+    cat "$file"
 done
