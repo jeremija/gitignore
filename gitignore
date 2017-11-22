@@ -1,17 +1,18 @@
 #!/bin/bash
+set -euo pipefail
 
-CWD=$(pwd)
 CACHE="$HOME/.cache"
 REPO="https://github.com/github/gitignore"
 REPO_DIR="$CACHE/gitignore"
 
-mkdir -p $CACHE
+mkdir -p "$CACHE"
 
 if [ ! -d "$REPO_DIR" ]; then
+    echo Cloning gitignore definitions...
     git clone --depth 1 $REPO "$REPO_DIR"
 fi
 
-cd $REPO_DIR
+cd "$REPO_DIR"
 
 if [ "$1" == "-u" ] || [ "$1" == "--update" ]; then
     git pull
