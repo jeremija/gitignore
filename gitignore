@@ -35,7 +35,6 @@ shift
 for arg in "$@"; do
     files="$files -o -iname $arg.gitignore"
 done
-echo $files
 
 for file in $(find . $files); do
     echo "### $file ###"
